@@ -1,28 +1,17 @@
 from typing import List, Optional
+from datetime import date
 from src.domain.models.todo import Todo
-from src.domain.repositories.todo_repository import TodoRepository
+from src.domain.repositories.todo_repository import ITodoRepository
 
 class TodoService:
-    def __init__(self, todo_repository: TodoRepository):
+    def __init__(self, todo_repository: ITodoRepository):
         self.todo_repository = todo_repository
 
     def get_all_todos(self) -> List[Todo]:
-        return self.todo_repository.get_all()
+        return self.todo_repository.get_all_todos()
 
-    def get_todo_by_id(self, todo_id: int) -> Optional[Todo]:
-        return self.todo_repository.get_by_id(todo_id)
-
-    def create_todo(self, title: str) -> Todo:
-        todo = Todo(id=0, title=title, completed=False)
-        return self.todo_repository.create(todo)
-
-    def update_todo(self, todo_id: int, title: str, completed: bool) -> Optional[Todo]:
-        todo = self.todo_repository.get_by_id(todo_id)
-        if todo:
-            todo.title = title
-            todo.completed = completed
-            return self.todo_repository.update(todo)
-        return None
-
-    def delete_todo(self, todo_id: int) -> None:
-        self.todo_repository.delete(todo_id)
+    def create_todo(self, title: str, base_date: Optional[date] = None) -> Todo:
+        if base_date is None:
+            base_date = date.today()
+        todo = Todo(title=title, base_date=base_date)
+        return self.todo_repository.create_todo(todo)

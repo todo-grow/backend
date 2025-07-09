@@ -1,6 +1,10 @@
-from pydantic import BaseModel
+from dataclasses import dataclass, field
+from datetime import date
+from typing import Optional
 
-class Todo(BaseModel):
-    id: int
+
+@dataclass
+class Todo:
     title: str
-    completed: bool
+    id: Optional[int] = None
+    base_date: date = field(default_factory=date.today)

@@ -1,40 +1,24 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, status
 from typing import List
+from dependency_injector.wiring import inject, Provide
+
 from src.application.services.todo_service import TodoService
-from src.domain.models.todo import Todo
-from src.infrastructure.database.in_memory_todo_repository import InMemoryTodoRepository
+from src.presentation.api.schemas import TodoCreate, TodoResponse
+from src.application.mappers.todo_mapper import TodoMapper
+from src.containers import Container
 
 router = APIRouter()
 
-# Create a single repository instance to be shared across requests
-todo_repository = InMemoryTodoRepository()
+# Todo CRUD operations
+@router.get("/todos", response_model=List[TodoResponse])
+@inject
+def get_all_todos(service: TodoService = Depends(Provide[Container.todo_service])):
+    todos = service.get_all_todos()
+    return [TodoMapper.to_todo_response(todo) for todo in todos]
 
-def get_todo_service():
-    return TodoService(todo_repository)
+@router.post("/todos", response_model=TodoResponse, status_code=status.HTTP_201_CREATED)
+@inject
+def create_todo(todo_create: TodoCreate, service: TodoService = Depends(Provide[Container.todo_service])):
+    todo = service.create_todo(title=todo_create.title, base_date=todo_create.base_date)
+    return TodoMapper.to_todo_response(todo)
 
-@router.get("/todos", response_model=List[Todo])
-def get_all_todos(service: TodoService = Depends(get_todo_service)):
-    return service.get_all_todos()
-
-@router.get("/todos/{todo_id}", response_model=Todo)
-def get_todo_by_id(todo_id: int, service: TodoService = Depends(get_todo_service)):
-    todo = service.get_todo_by_id(todo_id)
-    if todo is None:
-        raise HTTPException(status_code=404, detail="Todo not found")
-    return todo
-
-@router.post("/todos", response_model=Todo)
-def create_todo(title: str, service: TodoService = Depends(get_todo_service)):
-    return service.create_todo(title)
-
-@router.put("/todos/{todo_id}", response_model=Todo)
-def update_todo(todo_id: int, title: str, completed: bool, service: TodoService = Depends(get_todo_service)):
-    todo = service.update_todo(todo_id, title, completed)
-    if todo is None:
-        raise HTTPException(status_code=404, detail="Todo not found")
-    return todo
-
-@router.delete("/todos/{todo_id}")
-def delete_todo(todo_id: int, service: TodoService = Depends(get_todo_service)):
-    service.delete_todo(todo_id)
-    return {"message": "Todo deleted successfully"}

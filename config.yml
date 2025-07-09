@@ -1,0 +1,5 @@
+db:
+  user: "user"
+  password: "password"
+  host: "db"
+  name: "todo_grow"
