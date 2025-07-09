@@ -23,3 +23,7 @@ class ITaskRepository(ABC):
     @abstractmethod
     def delete(self, task_id: int) -> None:
         pass
+    
+    @abstractmethod
+    def get_subtasks_by_parent_id(self, parent_id: int) -> List[Task]:
+        pass

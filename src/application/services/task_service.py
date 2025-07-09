@@ -16,9 +16,26 @@ class TaskService:
 
     def get_tasks_by_todo_id(self, todo_id: int) -> List[Task]:
         return self.task_repository.get_by_todo_id(todo_id)
+    
+    def get_task_with_subtasks(self, task_id: int) -> Optional[Task]:
+        task = self.task_repository.get_by_id(task_id)
+        if task:
+            task.subtasks = self.task_repository.get_subtasks_by_parent_id(task_id)
+        return task
+    
+    def get_tasks_with_subtasks_by_todo_id(self, todo_id: int) -> List[Task]:
+        tasks = self.task_repository.get_by_todo_id(todo_id)
+        # 부모 태스크만 필터링 (parent_id가 None인 것들)
+        parent_tasks = [task for task in tasks if task.parent_id is None]
+        
+        # 각 부모 태스크에 subtask들을 추가
+        for task in parent_tasks:
+            task.subtasks = self.task_repository.get_subtasks_by_parent_id(task.id)
+        
+        return parent_tasks
 
     def update_task(
-        self, task_id: int, title: Optional[str] = None, description: Optional[str] = None, points: Optional[int] = None, completed: Optional[bool] = None
+        self, task_id: int, title: Optional[str] = None, points: Optional[int] = None, completed: Optional[bool] = None, parent_id: Optional[int] = None
     ) -> Task:
         """태스크의 기본 정보를 전체 수정합니다."""
         task = self.task_repository.get_by_id(task_id)
@@ -27,12 +44,12 @@ class TaskService:
 
         if title is not None:
             task.update_title(title)
-        if description is not None:
-            task.update_description(description)
         if points is not None:
             task.update_points(points)
         if completed is not None:
             task.completed = completed
+        if parent_id is not None:
+            task.parent_id = parent_id
 
         return self.task_repository.update(task)
 

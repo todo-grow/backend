@@ -13,10 +13,10 @@ class SQLAlchemyTaskRepository(ITaskRepository):
         with self.__session_factory() as session:
             task_orm = TaskORM(
                 title=task.title,
-                description=task.description,
                 points=task.points,
                 todo_id=task.todo_id,
                 completed=task.completed,
+                parent_id=task.parent_id,
             )
             session.add(task_orm)
             session.commit()
@@ -33,6 +33,11 @@ class SQLAlchemyTaskRepository(ITaskRepository):
     def get_by_todo_id(self, todo_id: int) -> List[Task]:
         with self.__session_factory() as session:
             task_orms = session.query(TaskORM).filter(TaskORM.todo_id == todo_id).all()
+            return [self._to_domain_task(task_orm) for task_orm in task_orms]
+    
+    def get_subtasks_by_parent_id(self, parent_id: int) -> List[Task]:
+        with self.__session_factory() as session:
+            task_orms = session.query(TaskORM).filter(TaskORM.parent_id == parent_id).all()
             return [self._to_domain_task(task_orm) for task_orm in task_orms]
 
     def update(self, task: Task) -> Task:
@@ -57,8 +62,8 @@ class SQLAlchemyTaskRepository(ITaskRepository):
         return Task(
             id=task_orm.id,
             title=task_orm.title,
-            description=task_orm.description,
             points=task_orm.points,
             todo_id=task_orm.todo_id,
             completed=task_orm.completed,
+            parent_id=task_orm.parent_id,
         )

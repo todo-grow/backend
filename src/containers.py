@@ -39,5 +39,5 @@ class Container(containers.DeclarativeContainer):
     )
 
     # Services
-    todo_service = providers.Singleton(TodoService, todo_repository=todo_repository)
     task_service = providers.Singleton(TaskService, task_repository=task_repository)
+    todo_service = providers.Singleton(TodoService, todo_repository=todo_repository, task_service=task_service)

@@ -1,15 +1,16 @@
-from dataclasses import dataclass
-from typing import Optional
+from dataclasses import dataclass, field
+from typing import Optional, List
 
 
 @dataclass
 class Task:
     id: Optional[int]
     title: str
-    description: Optional[str]
     points: int
     todo_id: int
     completed: bool = False
+    parent_id: Optional[int] = None
+    subtasks: List['Task'] = field(default_factory=list)
 
     def update_title(self, title: str) -> None:
         """태스크 제목을 수정합니다."""
@@ -17,9 +18,6 @@ class Task:
             raise ValueError("제목은 비어있을 수 없습니다.")
         self.title = title.strip()
 
-    def update_description(self, description: Optional[str]) -> None:
-        """태스크 설명을 수정합니다."""
-        self.description = description.strip() if description else None
 
     def update_points(self, points: int) -> None:
         """태스크 포인트를 수정합니다."""
@@ -34,3 +32,11 @@ class Task:
     def is_completed(self) -> bool:
         """태스크가 완료되었는지 확인합니다."""
         return self.completed
+    
+    def is_subtask(self) -> bool:
+        """서브태스크인지 확인합니다."""
+        return self.parent_id is not None
+    
+    def is_parent_task(self) -> bool:
+        """부모 태스크인지 확인합니다."""
+        return self.parent_id is None

@@ -10,3 +10,7 @@ class ITodoRepository(ABC):
     @abstractmethod
     def create_todo(self, todo: Todo) -> Todo:
         pass
+    
+    @abstractmethod
+    def get_by_id(self, todo_id: int) -> Optional[Todo]:
+        pass

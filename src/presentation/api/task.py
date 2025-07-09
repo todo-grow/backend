@@ -19,10 +19,10 @@ def create_task(
     task = Task(
         id=None,
         title=task_create.title,
-        description=task_create.description,
         points=task_create.points,
         todo_id=task_create.todo_id,
         completed=task_create.completed,
+        parent_id=task_create.parent_id,
     )
     created_task = task_service.create_task(task)
     return created_task
@@ -33,7 +33,7 @@ def create_task(
 def get_task(
     task_id: int, task_service: TaskService = Depends(Provide[Container.task_service])
 ):
-    task = task_service.get_task_by_id(task_id)
+    task = task_service.get_task_with_subtasks(task_id)
     if not task:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Task not found"
@@ -46,7 +46,7 @@ def get_task(
 def get_tasks_by_todo(
     todo_id: int, task_service: TaskService = Depends(Provide[Container.task_service])
 ):
-    tasks = task_service.get_tasks_by_todo_id(todo_id)
+    tasks = task_service.get_tasks_with_subtasks_by_todo_id(todo_id)
     return tasks
 
 
@@ -61,9 +61,9 @@ def update_task(
         updated_task = task_service.update_task(
             task_id=task_id,
             title=task_update.title,
-            description=task_update.description,
             points=task_update.points,
             completed=task_update.completed,
+            parent_id=task_update.parent_id,
         )
         return updated_task
     except ValueError as e:

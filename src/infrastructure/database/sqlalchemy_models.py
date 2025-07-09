@@ -18,9 +18,11 @@ class TaskORM(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, index=True)
-    description = Column(String, nullable=True)
     points = Column(Integer)
     todo_id = Column(Integer, ForeignKey("todos.id"))
     completed = Column(Boolean, default=False)
+    parent_id = Column(Integer, ForeignKey("tasks.id"), nullable=True)
 
     todo = relationship("TodoORM", back_populates="tasks")
+    parent = relationship("TaskORM", remote_side=[id], back_populates="subtasks")
+    subtasks = relationship("TaskORM", back_populates="parent")

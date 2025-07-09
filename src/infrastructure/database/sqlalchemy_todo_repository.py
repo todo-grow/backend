@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from src.domain.models.todo import Todo
 from src.domain.repositories.todo_repository import ITodoRepository
 from src.infrastructure.database.sqlalchemy_models import TodoORM
@@ -20,6 +20,13 @@ class SQLAlchemyTodoRepository(ITodoRepository):
             session.commit()
             session.refresh(todo_orm)
             return self._to_domain_todo(todo_orm)
+
+    def get_by_id(self, todo_id: int) -> Optional[Todo]:
+        with self.__session_factory() as session:
+            todo_orm = session.query(TodoORM).filter(TodoORM.id == todo_id).first()
+            if todo_orm:
+                return self._to_domain_todo(todo_orm)
+            return None
 
     def _to_domain_todo(self, todo_orm: TodoORM) -> Todo:
         return Todo(id=todo_orm.id, title=todo_orm.title, base_date=todo_orm.base_date)

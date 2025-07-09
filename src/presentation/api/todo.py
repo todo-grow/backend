@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, HTTPException
 from typing import List
 from dependency_injector.wiring import inject, Provide
 
@@ -13,8 +13,16 @@ router = APIRouter()
 @router.get("/todos", response_model=List[TodoResponse])
 @inject
 def get_all_todos(service: TodoService = Depends(Provide[Container.todo_service])):
-    todos = service.get_all_todos()
+    todos = service.get_all_todos_with_tasks()
     return [TodoMapper.to_todo_response(todo) for todo in todos]
+
+@router.get("/todos/{todo_id}", response_model=TodoResponse)
+@inject
+def get_todo(todo_id: int, service: TodoService = Depends(Provide[Container.todo_service])):
+    todo = service.get_todo_with_tasks(todo_id)
+    if not todo:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Todo not found")
+    return TodoMapper.to_todo_response(todo)
 
 @router.post("/todos", response_model=TodoResponse, status_code=status.HTTP_201_CREATED)
 @inject
