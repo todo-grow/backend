@@ -8,8 +8,7 @@ class TodoORM(Base):
     __tablename__ = "todos"
 
     id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, index=True)
-    base_date = Column(Date, default=date.today)
+    base_date = Column(Date, default=date.today, unique=True)
 
     tasks = relationship("TaskORM", back_populates="todo")
 
@@ -17,7 +16,7 @@ class TaskORM(Base):
     __tablename__ = "tasks"
 
     id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, index=True)
+    title = Column(String(255), index=True)
     points = Column(Integer)
     todo_id = Column(Integer, ForeignKey("todos.id"))
     completed = Column(Boolean, default=False)

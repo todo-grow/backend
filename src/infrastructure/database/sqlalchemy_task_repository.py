@@ -32,7 +32,10 @@ class SQLAlchemyTaskRepository(ITaskRepository):
 
     def get_by_todo_id(self, todo_id: int) -> List[Task]:
         with self.__session_factory() as session:
-            task_orms = session.query(TaskORM).filter(TaskORM.todo_id == todo_id).all()
+            task_orms = session.query(TaskORM).filter(
+                TaskORM.todo_id == todo_id, 
+                TaskORM.parent_id.is_(None)
+            ).all()
             return [self._to_domain_task(task_orm) for task_orm in task_orms]
     
     def get_subtasks_by_parent_id(self, parent_id: int) -> List[Task]:
@@ -44,8 +47,13 @@ class SQLAlchemyTaskRepository(ITaskRepository):
         with self.__session_factory() as session:
             task_orm = session.query(TaskORM).filter(TaskORM.id == task.id).first()
             if task_orm:
-                for key, value in task.__dict__.items():
-                    setattr(task_orm, key, value)
+                # subtasks 필드를 제외하고 업데이트
+                task_orm.title = task.title
+                task_orm.points = task.points
+                task_orm.todo_id = task.todo_id
+                task_orm.completed = task.completed
+                task_orm.parent_id = task.parent_id
+                
                 session.commit()
                 session.refresh(task_orm)
                 return self._to_domain_task(task_orm)
@@ -57,6 +65,24 @@ class SQLAlchemyTaskRepository(ITaskRepository):
             if task_orm:
                 session.delete(task_orm)
                 session.commit()
+
+    def delete_with_descendants(self, task_id: int) -> None:
+        """태스크와 모든 하위 태스크를 연쇄 삭제합니다."""
+        with self.__session_factory() as session:
+            self._delete_task_and_descendants_recursive(session, task_id)
+            session.commit()
+    
+    def _delete_task_and_descendants_recursive(self, session, task_id: int) -> None:
+        """재귀적으로 태스크와 하위 태스크들을 삭제합니다."""
+        # 먼저 하위 태스크들을 찾아서 재귀적으로 삭제
+        subtasks = session.query(TaskORM).filter(TaskORM.parent_id == task_id).all()
+        for subtask in subtasks:
+            self._delete_task_and_descendants_recursive(session, subtask.id)
+        
+        # 현재 태스크 삭제
+        task_orm = session.query(TaskORM).filter(TaskORM.id == task_id).first()
+        if task_orm:
+            session.delete(task_orm)
 
     def _to_domain_task(self, task_orm: TaskORM) -> Task:
         return Task(

@@ -27,3 +27,8 @@ class ITaskRepository(ABC):
     @abstractmethod
     def get_subtasks_by_parent_id(self, parent_id: int) -> List[Task]:
         pass
+    
+    @abstractmethod
+    def delete_with_descendants(self, task_id: int) -> None:
+        """태스크와 모든 하위 태스크를 연쇄 삭제합니다."""
+        pass

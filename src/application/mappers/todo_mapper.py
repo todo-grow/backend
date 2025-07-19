@@ -7,7 +7,6 @@ class TodoMapper:
     def to_todo_response(todo: Todo) -> TodoResponse:
         return TodoResponse(
             id=todo.id,
-            title=todo.title,
             base_date=todo.base_date,
             tasks=[TodoMapper._to_task_response(task) for task in todo.tasks]
         )

@@ -40,3 +40,14 @@ class Task:
     def is_parent_task(self) -> bool:
         """부모 태스크인지 확인합니다."""
         return self.parent_id is None
+    
+    def get_all_descendant_ids(self) -> List[int]:
+        """현재 태스크의 모든 하위 태스크 ID를 재귀적으로 반환합니다."""
+        descendant_ids = []
+        
+        for subtask in self.subtasks:
+            if subtask.id:
+                descendant_ids.append(subtask.id)
+                descendant_ids.extend(subtask.get_all_descendant_ids())
+        
+        return descendant_ids

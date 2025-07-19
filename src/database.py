@@ -24,6 +24,7 @@ class Database:
         self._session_factory = sessionmaker(
             autocommit=False, autoflush=False, bind=self._engine
         )
+        self._initialize_database()
 
     @contextmanager
     def session(self):
@@ -36,3 +37,13 @@ class Database:
             raise
         finally:
             session.close()
+    
+    def _initialize_database(self) -> None:
+        """Initialize database tables if they don't exist"""
+        from src.infrastructure.database.sqlalchemy_models import Base
+        try:
+            Base.metadata.create_all(bind=self._engine)
+            logger.info("Database tables initialized successfully")
+        except Exception as e:
+            logger.error(f"Failed to initialize database tables: {e}")
+            raise

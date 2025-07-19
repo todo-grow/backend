@@ -88,9 +88,7 @@ def toggle_task_completion(
 def delete_task(
     task_id: int, task_service: TaskService = Depends(Provide[Container.task_service])
 ):
-    task = task_service.get_task_by_id(task_id)
-    if not task:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Task not found"
-        )
-    task_service.delete_task(task_id)
+    try:
+        task_service.delete_task(task_id)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))

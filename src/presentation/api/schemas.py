@@ -5,13 +5,11 @@ from pydantic import BaseModel
 
 
 class TodoCreate(BaseModel):
-    title: str
     base_date: Optional[date] = None
 
 
 class TodoResponse(BaseModel):
     id: int
-    title: str
     base_date: date
     tasks: List['TaskResponse'] = []
 
@@ -34,13 +32,24 @@ class TaskUpdate(BaseModel):
     parent_id: Optional[int] = None
 
 
+class SubtaskResponse(BaseModel):
+    id: int
+    title: str
+    points: int
+    todo_id: int
+    completed: bool
+
+    class Config:
+        from_attributes = True
+
+
 class TaskResponse(BaseModel):
     id: int
     title: str
     points: int
     todo_id: int
     completed: bool
-    subtasks: List['TaskResponse'] = []
+    subtasks: List[SubtaskResponse] = []
 
     class Config:
         from_attributes = True

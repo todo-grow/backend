@@ -18,6 +18,12 @@ class TodoService:
             todo.tasks = self.task_service.get_tasks_with_subtasks_by_todo_id(todo.id)
         return todos
     
+    def get_todos_by_date_with_tasks(self, target_date: date) -> List[Todo]:
+        todos = self.todo_repository.get_todos_by_date(target_date)
+        for todo in todos:
+            todo.tasks = self.task_service.get_tasks_with_subtasks_by_todo_id(todo.id)
+        return todos
+    
     def get_todo_by_id(self, todo_id: int) -> Optional[Todo]:
         return self.todo_repository.get_by_id(todo_id)
     
@@ -27,8 +33,14 @@ class TodoService:
             todo.tasks = self.task_service.get_tasks_with_subtasks_by_todo_id(todo_id)
         return todo
 
-    def create_todo(self, title: str, base_date: Optional[date] = None) -> Todo:
+    def create_todo(self, base_date: Optional[date] = None) -> Todo:
         if base_date is None:
             base_date = date.today()
-        todo = Todo(title=title, base_date=base_date)
+        
+        # Check if todo already exists for this date
+        existing_todos = self.todo_repository.get_todos_by_date(base_date)
+        if existing_todos:
+            return existing_todos[0]
+        
+        todo = Todo(base_date=base_date)
         return self.todo_repository.create_todo(todo)
