@@ -10,7 +10,7 @@ from src.containers import Container
 from src.presentation.api.auth import get_current_user
 from src.domain.models.user import User
 
-router = APIRouter()
+router = APIRouter(prefix="/api")
 
 
 # Todo CRUD operations

@@ -9,7 +9,7 @@ from src.presentation.api.schemas import TaskCreate, TaskUpdate, TaskResponse
 from src.presentation.api.auth import get_current_user
 from src.domain.models.user import User
 
-router = APIRouter()
+router = APIRouter(prefix="/api")
 
 
 @router.post("/tasks", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
