@@ -22,3 +22,10 @@ services:
       - db
     environment:
       DATABASE_URL: mysql+pymysql://user:password@db:3306/todo_grow
+      KAKAO_CLIENT_ID: ${KAKAO_CLIENT_ID}
+      KAKAO_CLIENT_SECRET: ${KAKAO_CLIENT_SECRET}
+      KAKAO_REDIRECT_URI: ${KAKAO_REDIRECT_URI}
+      FRONTEND_URL: ${FRONTEND_URL}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+    env_file:
+      - .env

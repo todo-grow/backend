@@ -15,6 +15,7 @@ class SQLAlchemyTaskRepository(ITaskRepository):
                 title=task.title,
                 points=task.points,
                 todo_id=task.todo_id,
+                user_id=task.user_id,
                 completed=task.completed,
                 parent_id=task.parent_id,
             )
@@ -38,6 +39,14 @@ class SQLAlchemyTaskRepository(ITaskRepository):
             ).all()
             return [self._to_domain_task(task_orm) for task_orm in task_orms]
     
+    def get_by_todo_id_and_user(self, todo_id: int, user_id: int) -> List[Task]:
+        with self.__session_factory() as session:
+            task_orms = session.query(TaskORM).filter(
+                TaskORM.todo_id == todo_id,
+                TaskORM.user_id == user_id
+            ).all()
+            return [self._to_domain_task(task_orm) for task_orm in task_orms]
+    
     def get_subtasks_by_parent_id(self, parent_id: int) -> List[Task]:
         with self.__session_factory() as session:
             task_orms = session.query(TaskORM).filter(TaskORM.parent_id == parent_id).all()
@@ -51,6 +60,7 @@ class SQLAlchemyTaskRepository(ITaskRepository):
                 task_orm.title = task.title
                 task_orm.points = task.points
                 task_orm.todo_id = task.todo_id
+                task_orm.user_id = task.user_id
                 task_orm.completed = task.completed
                 task_orm.parent_id = task.parent_id
                 
@@ -90,6 +100,7 @@ class SQLAlchemyTaskRepository(ITaskRepository):
             title=task_orm.title,
             points=task_orm.points,
             todo_id=task_orm.todo_id,
+            user_id=task_orm.user_id,
             completed=task_orm.completed,
             parent_id=task_orm.parent_id,
         )

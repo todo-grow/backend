@@ -19,3 +19,11 @@ class ITodoRepository(ABC):
     @abstractmethod
     def get_todos_by_date(self, target_date: date) -> List[Todo]:
         pass
+
+    @abstractmethod
+    def get_all_todos_by_user(self, user_id: int) -> List[Todo]:
+        pass
+
+    @abstractmethod
+    def get_todos_by_date_and_user(self, target_date: date, user_id: int) -> List[Todo]:
+        pass

@@ -8,6 +8,7 @@ class Task:
     title: str
     points: int
     todo_id: int
+    user_id: Optional[int] = None
     completed: bool = False
     parent_id: Optional[int] = None
     subtasks: List['Task'] = field(default_factory=list)

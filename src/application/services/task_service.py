@@ -29,8 +29,8 @@ class TaskService:
             task.subtasks = self.task_repository.get_subtasks_by_parent_id(task_id)
         return task
     
-    def get_tasks_with_subtasks_by_todo_id(self, todo_id: int) -> List[Task]:
-        tasks = self.task_repository.get_by_todo_id(todo_id)
+    def get_tasks_with_subtasks_by_todo_id(self, todo_id: int, user_id: int) -> List[Task]:
+        tasks = self.task_repository.get_by_todo_id_and_user(todo_id, user_id)
         # 부모 태스크만 필터링 (parent_id가 None인 것들)
         parent_tasks = [task for task in tasks if task.parent_id is None]
         
@@ -41,11 +41,11 @@ class TaskService:
         return parent_tasks
 
     def update_task(
-        self, task_id: int, title: Optional[str] = None, points: Optional[int] = None, completed: Optional[bool] = None, parent_id: Optional[int] = None
+        self, task_id: int, title: Optional[str] = None, points: Optional[int] = None, completed: Optional[bool] = None, parent_id: Optional[int] = None, user_id: int = None
     ) -> Task:
         """태스크의 기본 정보를 전체 수정합니다."""
         task = self.task_repository.get_by_id(task_id)
-        if not task:
+        if not task or task.user_id != user_id:
             raise ValueError(f"Task with id {task_id} not found")
 
         # parent_id 변경 시 서브태스크 depth 검증
@@ -65,19 +65,19 @@ class TaskService:
 
         return self.task_repository.update(task)
 
-    def toggle_task_completion(self, task_id: int) -> Task:
+    def toggle_task_completion(self, task_id: int, user_id: int) -> Task:
         """태스크의 완료 상태를 토글합니다."""
         task = self.task_repository.get_by_id(task_id)
-        if not task:
+        if not task or task.user_id != user_id:
             raise ValueError(f"Task with id {task_id} not found")
 
         task.toggle_completion()
         return self.task_repository.update(task)
 
-    def delete_task(self, task_id: int) -> None:
+    def delete_task(self, task_id: int, user_id: int) -> None:
         """태스크와 모든 하위 태스크를 연쇄 삭제합니다."""
         task = self.task_repository.get_by_id(task_id)
-        if not task:
+        if not task or task.user_id != user_id:
             raise ValueError(f"Task with id {task_id} not found")
         
         self.task_repository.delete_with_descendants(task_id)

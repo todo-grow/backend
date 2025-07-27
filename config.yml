@@ -3,3 +3,11 @@ db:
   password: "password"
   host: "db"
   name: "todo_grow"
+
+oauth:
+  kakao:
+    client_id: "${KAKAO_CLIENT_ID}"
+    client_secret: "${KAKAO_CLIENT_SECRET}"
+    redirect_uri: "${KAKAO_REDIRECT_URI}"
+  frontend_url: "${FRONTEND_URL}"
+  

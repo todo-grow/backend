@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.presentation.api.health import router as health_router
 from src.presentation.api.todo import router as todo_router
 from src.presentation.api.task import router as task_router
+from src.presentation.api.auth import router as auth_router
 from src.containers import Container
 
 
@@ -27,3 +28,4 @@ app.add_middleware(
 app.include_router(health_router)
 app.include_router(todo_router)
 app.include_router(task_router)
+app.include_router(auth_router)

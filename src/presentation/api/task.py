@@ -6,6 +6,8 @@ from src.application.services.task_service import TaskService
 from src.containers import Container
 from src.domain.models.task import Task
 from src.presentation.api.schemas import TaskCreate, TaskUpdate, TaskResponse
+from src.presentation.api.auth import get_current_user
+from src.domain.models.user import User
 
 router = APIRouter()
 
@@ -14,6 +16,7 @@ router = APIRouter()
 @inject
 def create_task(
     task_create: TaskCreate,
+    current_user: User = Depends(get_current_user),
     task_service: TaskService = Depends(Provide[Container.task_service]),
 ):
     task = Task(
@@ -21,6 +24,7 @@ def create_task(
         title=task_create.title,
         points=task_create.points,
         todo_id=task_create.todo_id,
+        user_id=current_user.id,
         completed=task_create.completed,
         parent_id=task_create.parent_id,
     )
@@ -31,10 +35,12 @@ def create_task(
 @router.get("/tasks/{task_id}", response_model=TaskResponse)
 @inject
 def get_task(
-    task_id: int, task_service: TaskService = Depends(Provide[Container.task_service])
+    task_id: int, 
+    current_user: User = Depends(get_current_user),
+    task_service: TaskService = Depends(Provide[Container.task_service])
 ):
     task = task_service.get_task_with_subtasks(task_id)
-    if not task:
+    if not task or task.user_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Task not found"
         )
@@ -44,9 +50,11 @@ def get_task(
 @router.get("/todos/{todo_id}/tasks", response_model=List[TaskResponse])
 @inject
 def get_tasks_by_todo(
-    todo_id: int, task_service: TaskService = Depends(Provide[Container.task_service])
+    todo_id: int, 
+    current_user: User = Depends(get_current_user),
+    task_service: TaskService = Depends(Provide[Container.task_service])
 ):
-    tasks = task_service.get_tasks_with_subtasks_by_todo_id(todo_id)
+    tasks = task_service.get_tasks_with_subtasks_by_todo_id(todo_id, current_user.id)
     return tasks
 
 
@@ -55,6 +63,7 @@ def get_tasks_by_todo(
 def update_task(
     task_id: int,
     task_update: TaskUpdate,
+    current_user: User = Depends(get_current_user),
     task_service: TaskService = Depends(Provide[Container.task_service]),
 ):
     try:
@@ -64,6 +73,7 @@ def update_task(
             points=task_update.points,
             completed=task_update.completed,
             parent_id=task_update.parent_id,
+            user_id=current_user.id,
         )
         return updated_task
     except ValueError as e:
@@ -74,10 +84,11 @@ def update_task(
 @inject
 def toggle_task_completion(
     task_id: int,
+    current_user: User = Depends(get_current_user),
     task_service: TaskService = Depends(Provide[Container.task_service]),
 ):
     try:
-        updated_task = task_service.toggle_task_completion(task_id)
+        updated_task = task_service.toggle_task_completion(task_id, current_user.id)
         return updated_task
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
@@ -86,9 +97,11 @@ def toggle_task_completion(
 @router.delete("/tasks/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
 @inject
 def delete_task(
-    task_id: int, task_service: TaskService = Depends(Provide[Container.task_service])
+    task_id: int, 
+    current_user: User = Depends(get_current_user),
+    task_service: TaskService = Depends(Provide[Container.task_service])
 ):
     try:
-        task_service.delete_task(task_id)
+        task_service.delete_task(task_id, current_user.id)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))

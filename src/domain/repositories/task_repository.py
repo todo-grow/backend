@@ -17,6 +17,10 @@ class ITaskRepository(ABC):
         pass
 
     @abstractmethod
+    def get_by_todo_id_and_user(self, todo_id: int, user_id: int) -> List[Task]:
+        pass
+
+    @abstractmethod
     def update(self, task: Task) -> Task:
         pass
 
