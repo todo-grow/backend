@@ -44,7 +44,17 @@ class AuthService:
             return None
 
     def get_or_create_user(self, kakao_user_info: Dict[str, Any]) -> User:
-        """카카오 사용자 정보로 유저 조회 또는 생성"""
+        """
+        Retrieve an existing user by Kakao user info or create a new user with default values if necessary.
+        
+        If a user with the given Kakao ID exists, returns that user. Otherwise, creates a new user using the provided Kakao profile information, assigning default values for nickname and profile image if these are not present.
+        
+        Parameters:
+            kakao_user_info (Dict[str, Any]): The user information dictionary obtained from Kakao.
+        
+        Returns:
+            User: The existing or newly created user instance.
+        """
         kakao_id = str(kakao_user_info["id"])
         existing_user = self._user_repository.get_by_kakao_id(kakao_id)
         
