@@ -7,6 +7,11 @@ from src.domain.models.user import User
 from src.domain.repositories.user_repository import UserRepository
 
 
+# 기본값 상수
+DEFAULT_NICKNAME = "오소리"
+DEFAULT_PROFILE_IMAGE = "https://gift-s.kakaocdn.net/dn/gift/images/m960/profile_default.png"
+
+
 class AuthService:
     def __init__(self, user_repository: UserRepository):
         self._user_repository = user_repository
@@ -56,8 +61,8 @@ class AuthService:
         kakao_account = kakao_user_info.get("kakao_account", {})
         
         # 프로필 정보 비동의 시 기본값 설정
-        nickname = properties.get("nickname", "오소리")
-        profile_image = properties.get("profile_image", "https://gift-s.kakaocdn.net/dn/gift/images/m960/profile_default.png")
+        nickname = properties.get("nickname") or DEFAULT_NICKNAME
+        profile_image = properties.get("profile_image") or DEFAULT_PROFILE_IMAGE
         
         new_user = User(
             kakao_id=kakao_id,
