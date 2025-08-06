@@ -55,10 +55,14 @@ class AuthService:
         properties = kakao_user_info.get("properties", {})
         kakao_account = kakao_user_info.get("kakao_account", {})
         
+        # 프로필 정보 비동의 시 기본값 설정
+        nickname = properties.get("nickname", "오소리")
+        profile_image = properties.get("profile_image", "https://gift-s.kakaocdn.net/dn/gift/images/m960/profile_default.png")
+        
         new_user = User(
             kakao_id=kakao_id,
-            nickname=properties.get("nickname"),
-            profile_image=properties.get("profile_image"),
+            nickname=nickname,
+            profile_image=profile_image,
             email=kakao_account.get("email")
         )
         
