@@ -97,7 +97,7 @@ class AuthService:
         """카카오 계정 연결 해제 (Admin Key 사용)"""
         admin_key = os.getenv("KAKAO_ADMIN_KEY")
         if not admin_key:
-            return False
+            raise ValueError("KAKAO_ADMIN_KEY가 설정되지 않았습니다.")
             
         async with httpx.AsyncClient() as client:
             headers = {"Authorization": f"KakaoAK {admin_key}"}
