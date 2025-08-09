@@ -5,17 +5,18 @@ from src.presentation.api.todo import router as todo_router
 from src.presentation.api.task import router as task_router
 from src.presentation.api.auth import router as auth_router
 from src.containers import Container
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 container = Container()
 container.config.from_yaml("config.yml")
 
-app = FastAPI(docs_url="/api/v1/documentation", openapi_url="/api/v1/openapi.json")
+app = FastAPI(docs_url="/api/documentation", openapi_url="/api/openapi.json")
 app.container = container  # type: ignore
 
-origins = [
-    "*"
-]
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
