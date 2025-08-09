@@ -92,3 +92,7 @@ class AuthService:
             return payload
         except JWTError:
             return None
+
+    def delete_user(self, user_id: int) -> bool:
+        """사용자 계정 삭제 (회원탈퇴)"""
+        return self._user_repository.delete(user_id)

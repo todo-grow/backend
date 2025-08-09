@@ -43,5 +43,5 @@ class UserORM(Base):
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 
-    todos = relationship("TodoORM", back_populates="user")
-    tasks = relationship("TaskORM", back_populates="user")
+    todos = relationship("TodoORM", back_populates="user", cascade="all, delete-orphan")
+    tasks = relationship("TaskORM", back_populates="user", cascade="all, delete-orphan")
