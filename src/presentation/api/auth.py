@@ -104,3 +104,22 @@ async def get_current_user(
     # 사용자 조회 로직이 필요하다면 여기에 추가
     user = User(id=int(user_id), kakao_id=payload.get("kakao_id"), nickname=payload.get("nickname"))
     return user
+
+
+@router.delete("/withdraw")
+@inject
+def withdraw_user(
+    current_user: User = Depends(get_current_user),
+    auth_service: AuthService = Depends(Provide[Container.auth_service])
+):
+    """회원탈퇴"""
+    try:
+        success = auth_service.delete_user(current_user.id)
+        
+        if not success:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        return {"message": "User account deleted successfully"}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Failed to delete user account")
