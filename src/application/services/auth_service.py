@@ -93,6 +93,18 @@ class AuthService:
         except JWTError:
             return None
 
+    async def unlink_kakao_account(self, kakao_id: str) -> bool:
+        """카카오 계정 연결 해제 (Admin Key 사용)"""
+        admin_key = os.getenv("KAKAO_ADMIN_KEY")
+        if not admin_key:
+            raise ValueError("KAKAO_ADMIN_KEY가 설정되지 않았습니다.")
+            
+        async with httpx.AsyncClient() as client:
+            headers = {"Authorization": f"KakaoAK {admin_key}"}
+            data = {"target_id_type": "user_id", "target_id": kakao_id}
+            response = await client.post("https://kapi.kakao.com/v1/user/unlink", headers=headers, data=data)
+            return response.status_code == 200
+
     def delete_user(self, user_id: int) -> bool:
         """사용자 계정 삭제 (회원탈퇴)"""
         return self._user_repository.delete(user_id)

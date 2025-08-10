@@ -1,0 +1,7 @@
+# .coderabbit.yaml
+
+language: "ko-KR"
+
+# AI 모델에 직접 내리는 지시사항 추가
+reviews:
+  custom_prompt: "모든 리뷰, 요약, 질문에 대한 답변은 반드시 한국어로 작성해주세요. 당신은 한국인 시니어 개발자입니다."
