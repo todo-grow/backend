@@ -89,15 +89,27 @@ def get_kakao_login_url():
     return {"login_url": kakao_login_url}
 
 
-security = HTTPBearer()
+security = HTTPBearer(auto_error=False)  # auto_error=False로 설정하면 토큰 없어도 에러 안남
 
 
 @inject
 async def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
     auth_service: AuthService = Depends(Provide[Container.auth_service]),
 ) -> User:
     """현재 인증된 사용자 가져오기"""
+    # 로컬 개발 환경에서 인증 우회
+    if os.getenv("DISABLE_AUTH", "false").lower() == "true":
+        return User(
+            id=int(os.getenv("DEV_USER_ID", "1")),
+            kakao_id=os.getenv("DEV_KAKAO_ID", "dev_kakao_id"),
+            nickname=os.getenv("DEV_NICKNAME", "개발자"),
+        )
+
+    # 프로덕션 환경에서는 토큰 필수
+    if not credentials:
+        raise HTTPException(status_code=401, detail="Missing authentication token")
+
     token = credentials.credentials
     payload = auth_service.verify_token(token)
 
