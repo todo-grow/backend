@@ -126,8 +126,12 @@ async def withdraw_user(
     """회원탈퇴"""
     try:
         # 카카오 계정 연결 해제
-        kakao_unlink_success = await auth_service.unlink_kakao_account(current_user.kakao_id)
-        
+        kakao_unlink_success = (
+            await auth_service.unlink_kakao_account(current_user.kakao_id)
+            if current_user.kakao_id
+            else True
+        )
+
         # 앱 내 사용자 데이터 삭제
         user_delete_success = auth_service.delete_user(current_user.id)
 
@@ -136,9 +140,12 @@ async def withdraw_user(
 
         response_data = {"message": "User account deleted successfully"}
         if not kakao_unlink_success:
-            response_data["warning"] = "Kakao account unlink failed, but user data was deleted"
-            
+            response_data["warning"] = (
+                "Kakao account unlink failed, but user data was deleted"
+            )
+
         return response_data
 
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=500, detail="Failed to delete user account")
