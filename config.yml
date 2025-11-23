@@ -10,4 +10,6 @@ oauth:
     client_secret: "${KAKAO_CLIENT_SECRET}"
     redirect_uri: "${KAKAO_REDIRECT_URI}"
   frontend_url: "${FRONTEND_URL}"
-  
+
+gemini:
+  api_key: "${GEMINI_API_KEY}"

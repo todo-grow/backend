@@ -1,3 +1,5 @@
+import os
+
 from fastapi import APIRouter, Depends, HTTPException, Query, Header
 from fastapi.responses import RedirectResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -5,7 +7,7 @@ from dependency_injector.wiring import inject, Provide
 from src.containers import Container
 from src.application.services.auth_service import AuthService
 from src.domain.models.user import User
-import os
+
 from urllib.parse import urlencode
 from typing import Optional
 
@@ -89,7 +91,8 @@ def get_kakao_login_url():
     return {"login_url": kakao_login_url}
 
 
-security = HTTPBearer(auto_error=False)  # auto_error=False로 설정하면 토큰 없어도 에러 안남
+# auto_error=False로 설정하면 토큰 없어도 에러 안남
+security = HTTPBearer(auto_error=False)
 
 
 @inject
@@ -101,7 +104,7 @@ async def get_current_user(
     # 로컬 개발 환경에서 인증 우회
     if os.getenv("DISABLE_AUTH", "false").lower() == "true":
         return User(
-            id=int(os.getenv("DEV_USER_ID", "1")),
+            id=int(os.getenv("DEV_USER_ID", 9999999)),
             kakao_id=os.getenv("DEV_KAKAO_ID", "dev_kakao_id"),
             nickname=os.getenv("DEV_NICKNAME", "개발자"),
         )
@@ -120,7 +123,6 @@ async def get_current_user(
     if not user_id:
         raise HTTPException(status_code=401, detail="Invalid token")
 
-    # 사용자 조회 로직이 필요하다면 여기에 추가
     user = User(
         id=int(user_id),
         kakao_id=payload.get("kakao_id"),

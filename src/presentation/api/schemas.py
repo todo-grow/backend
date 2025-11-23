@@ -8,6 +8,11 @@ class TodoCreate(BaseModel):
     base_date: Optional[date] = None
 
 
+class AITodoCreate(BaseModel):
+    user_input: str
+    base_date: Optional[date] = None
+
+
 class TodoResponse(BaseModel):
     id: int
     base_date: date
@@ -53,3 +58,31 @@ class TaskResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class AITaskData(BaseModel):
+    title: str
+    points: int
+    subtasks: List['AISubtaskData'] = []
+
+
+class AISubtaskData(BaseModel):
+    title: str
+    points: int
+
+
+class AITodoResponse(BaseModel):
+    base_date: Optional[date] = None
+    tasks: List[AITaskData] = []
+
+
+class BulkTaskCreate(BaseModel):
+    title: str
+    points: int
+    completed: bool = False
+    parent_id: Optional[int] = None
+
+
+class BulkTodoCreate(BaseModel):
+    base_date: Optional[date] = None
+    tasks: List[BulkTaskCreate] = []

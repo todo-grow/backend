@@ -1,7 +1,21 @@
 import pytest
 from src.application.services.auth_service import AuthService, DEFAULT_NICKNAME, DEFAULT_PROFILE_IMAGE
+from src.application.services.social_auth_provider import SocialAuthProvider
 from src.infrastructure.database.sqlalchemy_user_repository import SqlAlchemyUserRepository
 from .fixtures import KakaoUserInfoFixture, UserFixture
+
+
+class DummySocialAuthProvider(SocialAuthProvider):
+    async def get_user_info(self, access_token: str):
+        return None
+
+    async def get_access_token_from_code(
+        self, code: str, client_id: str, client_secret: str, redirect_uri: str
+    ):
+        return None
+
+    async def unlink_account(self, provider_user_id: str) -> bool:
+        return True
 
 
 class TestAuthService:
@@ -9,7 +23,7 @@ class TestAuthService:
     def auth_service(self, session_factory):
         """AuthService 인스턴스 생성"""
         user_repository = SqlAlchemyUserRepository(session_factory)
-        return AuthService(user_repository)
+        return AuthService(user_repository, DummySocialAuthProvider())
 
     def test_get_or_create_user_with_full_profile_info(self, auth_service):
         """프로필 정보가 모두 제공된 경우 테스트"""

@@ -16,6 +16,9 @@ from src.infrastructure.database.sqlalchemy_user_repository import (
 from src.application.services.todo_service import TodoService
 from src.application.services.task_service import TaskService
 from src.application.services.auth_service import AuthService
+from src.application.services.ai_service import AIService
+from src.infrastructure.ai.gemini_model_service import GeminiModelService
+from src.infrastructure.auth import KakaoAuthProvider
 
 
 class Container(containers.DeclarativeContainer):
@@ -36,17 +39,34 @@ class Container(containers.DeclarativeContainer):
     database = providers.Singleton(Database, engine=db_engine)
 
     # Repositories
-    todo_repository: providers.Provider[ITodoRepository] = providers.Singleton(
+    todo_repository: providers.Provider[ITodoRepository] = providers.Factory(
         SQLAlchemyTodoRepository, session_factory=database.provided.session
     )
-    task_repository: providers.Provider[ITaskRepository] = providers.Singleton(
+    task_repository: providers.Provider[ITaskRepository] = providers.Factory(
         SQLAlchemyTaskRepository, session_factory=database.provided.session
     )
-    user_repository: providers.Provider[UserRepository] = providers.Singleton(
+    user_repository: providers.Provider[UserRepository] = providers.Factory(
         SqlAlchemyUserRepository, session_factory=database.provided.session
     )
 
+    # AI Model Services
+    gemini_model_service = providers.Factory(
+        GeminiModelService, api_key=config.gemini.api_key
+    )
+
+    # AI Service
+    ai_service = providers.Factory(AIService, model_service=gemini_model_service)
+
+    # Auth Providers
+    kakao_auth_provider = providers.Factory(KakaoAuthProvider)
+
     # Services
-    task_service = providers.Singleton(TaskService, task_repository=task_repository)
-    todo_service = providers.Singleton(TodoService, todo_repository=todo_repository, task_service=task_service)
-    auth_service = providers.Singleton(AuthService, user_repository=user_repository)
+    task_service = providers.Factory(TaskService, task_repository=task_repository)
+    todo_service = providers.Factory(
+        TodoService, todo_repository=todo_repository, task_service=task_service
+    )
+    auth_service = providers.Factory(
+        AuthService,
+        user_repository=user_repository,
+        auth_provider=kakao_auth_provider,
+    )
